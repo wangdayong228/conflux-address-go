@@ -29,7 +29,7 @@ func verify(t *testing.T, hexAddressStr string, networkID uint32, base32Address 
 	fatalIfErr(t, err)
 
 	if !reflect.DeepEqual(cfxAddressFromHex, cfxAddressFromBase32) {
-		t.Fatalf("expect %#v, actual %#v", cfxAddressFromHex, cfxAddressFromBase32)
+		t.Fatalf("expect %v, actual %v", cfxAddressFromHex.VerboseString(), cfxAddressFromBase32.VerboseString())
 	}
 }
 

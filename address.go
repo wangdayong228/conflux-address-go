@@ -9,10 +9,10 @@ import (
 
 // CfxAddress ...
 type CfxAddress struct {
-	NetworkType
-	AddressType
-	Body
-	Checksum
+	NetworkType NetworkType
+	AddressType AddressType
+	Body        Body
+	Checksum    Checksum
 }
 
 func (c CfxAddress) String() string {
@@ -26,7 +26,7 @@ func (c CfxAddress) VerboseString() string {
 
 // NewCfxAddressByBase32String ...
 func NewCfxAddressByBase32String(base32Str string) (cfxAddress CfxAddress, err error) {
-	if strings.ToLower(base32Str) != base32Str || strings.ToUpper(base32Str) != base32Str {
+	if strings.ToLower(base32Str) != base32Str && strings.ToUpper(base32Str) != base32Str {
 		err = errors.Errorf("not support base32 string with mix lowercase and uppercase %v", base32Str)
 		return
 	}
@@ -54,7 +54,7 @@ func NewCfxAddressByBase32String(base32Str string) (cfxAddress CfxAddress, err e
 		return
 	}
 
-	_, hexAddress, err := cfxAddress.Body.Encode()
+	_, hexAddress, err := cfxAddress.Body.ToHexAddress()
 	if err != nil {
 		return
 	}
@@ -84,16 +84,18 @@ func NewCfxAddressByBase32String(base32Str string) (cfxAddress CfxAddress, err e
 func NewCfxAddressByHexAddress(hexAddress []byte, networkID uint32) (CfxAddress, error) {
 	val := CfxAddress{}
 	var err error
-	val.NetworkType.EncodeFromID(networkID)
+	val.NetworkType = NewNetworkTypeByID(networkID)
 	val.AddressType, err = CalcAddressType(hexAddress)
+
 	if err != nil {
 		return val, errors.Wrap(err, "failed to calculate address type")
 	}
-	versionType, err := CalcVersionType(hexAddress)
+	versionByte, err := CalcVersionByte(hexAddress)
+
 	if err != nil {
 		return val, errors.Wrap(err, "failed to calculate version type")
 	}
-	err = val.Body.Decode(versionType, hexAddress)
+	val.Body, err = NewBodyByHexAddress(versionByte, hexAddress)
 	if err != nil {
 		return val, errors.Wrap(err, "failed to decode to body")
 	}
@@ -104,7 +106,8 @@ func NewCfxAddressByHexAddress(hexAddress []byte, networkID uint32) (CfxAddress,
 	return val, nil
 }
 
-func (c CfxAddress) Encode() (hexAddress []byte, networkID uint32, err error) {
+// ToHexAddress ...
+func (c CfxAddress) ToHexAddress() (hexAddress []byte, networkID uint32, err error) {
 	// verify checksum
 	var actualChecksum Checksum
 	actualChecksum, err = CalcChecksum(c.NetworkType, c.Body)
@@ -116,12 +119,12 @@ func (c CfxAddress) Encode() (hexAddress []byte, networkID uint32, err error) {
 		return
 	}
 
-	_, hexAddress, err = c.Body.Encode()
+	_, hexAddress, err = c.Body.ToHexAddress()
 	if err != nil {
 		return
 	}
 
-	networkID, err = c.NetworkType.Decode()
+	networkID, err = c.NetworkType.ToNetworkID()
 	if err != nil {
 		return
 	}

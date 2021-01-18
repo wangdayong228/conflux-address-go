@@ -36,7 +36,7 @@ func convert(data []byte, inbits uint, outbits uint) ([]byte, error) {
 		accBits += inbits
 		for accBits >= outbits {
 			val := byte(acc >> uint16(accBits-outbits))
-			fmt.Printf("5bits val:%v\n", val)
+			// fmt.Printf("5bits val:%v\n", val)
 			ret = append(ret, val)
 			// fmt.Printf("ret: %b\n", ret)
 			acc = acc & uint16(1<<(accBits-outbits)-1)

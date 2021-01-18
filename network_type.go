@@ -37,20 +37,20 @@ func NewNetowrkType(nt string) (NetworkType, error) {
 	return "", errors.New("invalid network type")
 }
 
-func (n *NetworkType) EncodeFromID(networkID uint32) {
-	var nRaw NetworkType
+func NewNetworkTypeByID(networkID uint32) NetworkType {
+	var nt NetworkType
 	switch networkID {
 	case MAINNET_ID:
-		nRaw = MAINNET_PREFIX
+		nt = MAINNET_PREFIX
 	case TESTNET_ID:
-		nRaw = TESTNET_PREFIX
+		nt = TESTNET_PREFIX
 	default:
-		nRaw = NetworkType(fmt.Sprintf("net%v", networkID))
+		nt = NetworkType(fmt.Sprintf("net%v", networkID))
 	}
-	*n = nRaw
+	return nt
 }
 
-func (n NetworkType) Decode() (uint32, error) {
+func (n NetworkType) ToNetworkID() (uint32, error) {
 	switch n {
 	case MAINNET_PREFIX:
 		return MAINNET_ID, nil
@@ -58,14 +58,14 @@ func (n NetworkType) Decode() (uint32, error) {
 		return TESTNET_ID, nil
 	default:
 		if n[0:3] == "net" {
-			netId, err := strconv.Atoi(string(n[3:]))
+			netID, err := strconv.Atoi(string(n[3:]))
 			if err != nil {
 				return 0, err
 			}
-			if netId >= (1 >> 32) {
+			if netID >= (1 >> 32) {
 				return 0, errors.New("NetworkID must in range 0~0xffffffff")
 			}
-			return uint32(netId), nil
+			return uint32(netID), nil
 		}
 		return 0, errors.New("Invalid network")
 	}

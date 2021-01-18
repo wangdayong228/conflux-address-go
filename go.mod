@@ -1,4 +1,4 @@
-module github.com/wangdayong228/conflux-address-go
+module github/wangdayong228/conflux-address-go
 
 go 1.15
 

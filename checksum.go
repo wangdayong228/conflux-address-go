@@ -1,8 +1,6 @@
 package cfxaddress
 
 import (
-	"fmt"
-
 	"github.com/pkg/errors"
 )
 
@@ -51,16 +49,16 @@ func CalcChecksum(nt NetworkType, body Body) (c Checksum, err error) {
 	checksumInput = append(checksumInput, payload5Bits...)
 	checksumInput = append(checksumInput, template[:]...)
 
-	fmt.Printf("checksumInput:%x\n", checksumInput)
+	// fmt.Printf("checksumInput:%x\n", checksumInput)
 
 	uint64Chc := polymod(checksumInput)
-	fmt.Printf("uint64Chc:%x\n", uint64Chc)
+	// fmt.Printf("uint64Chc:%x\n", uint64Chc)
 
 	low40BitsChc := uint64ToBytes(uint64Chc)[3:]
-	fmt.Printf("low40BitsChc of %x:%x\n", uint64ToBytes(uint64Chc), low40BitsChc)
+	// fmt.Printf("low40BitsChc of %x:%x\n", uint64ToBytes(uint64Chc), low40BitsChc)
 
 	checksumIn5Bits, err := convert(low40BitsChc, 8, 5)
-	fmt.Printf("low40BitsChcIn5Bits:%x\n", checksumIn5Bits)
+	// fmt.Printf("low40BitsChcIn5Bits:%x\n", checksumIn5Bits)
 
 	if err != nil {
 		err = errors.Wrapf(err, "failed to convert %v from 8 to 5 bits", low40BitsChc)

@@ -26,10 +26,7 @@ const (
 	NULL     AddressType = "null"
 )
 
-const (
-	ErrInvalidAddressType string = "Invalid address type"
-)
-
+// CalcAddressType ...
 func CalcAddressType(hexAddress []byte) (AddressType, error) {
 	nullAddr, err := hex.DecodeString("0000000000000000000000000000000000000000")
 	if err != nil {
@@ -38,12 +35,24 @@ func CalcAddressType(hexAddress []byte) (AddressType, error) {
 	if reflect.DeepEqual(nullAddr, hexAddress) {
 		return NULL, nil
 	}
+
 	var addressType AddressType
-	addressType.Decode(hexAddress[0])
+	switch hexAddress[0] & 0xf0 {
+	case 0x00:
+		addressType = BUILTIN
+	case 0x10:
+		addressType = USER
+	case 0x80:
+		addressType = CONTRACT
+	default:
+		return "", errors.Errorf("Failed to calc address type of address %v", hexAddress)
+	}
+	// fmt.Printf("calc address type of %x : %v\n", hexAddress, addressType)
 	return addressType, nil
 }
 
-func (a AddressType) Encode() (byte, error) {
+// ToByte ...
+func (a AddressType) ToByte() (byte, error) {
 	switch a {
 	case NULL:
 		return 0x00, nil
@@ -55,22 +64,6 @@ func (a AddressType) Encode() (byte, error) {
 		return 0x80, nil
 	}
 	return 0, errors.Errorf("Invalid address type %v", a)
-}
-
-func (a *AddressType) Decode(b byte) error {
-	var addressType AddressType
-	switch b & 0xf0 {
-	case 0x00:
-		addressType = BUILTIN
-	case 0x10:
-		addressType = USER
-	case 0x80:
-		addressType = CONTRACT
-	default:
-		return errors.Errorf("Invalid address type byte %v", b)
-	}
-	*a = addressType
-	return nil
 }
 
 func (a AddressType) String() string {

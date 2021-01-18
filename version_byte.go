@@ -61,8 +61,8 @@ func NewVersionByte(b byte) (vt VersionByte) {
 	return
 }
 
-// CalcVersionType ...
-func CalcVersionType(hexAddress []byte) (versionByte VersionByte, err error) {
+// CalcVersionByte ...
+func CalcVersionByte(hexAddress []byte) (versionByte VersionByte, err error) {
 	versionByte.TypeBits = 0
 	versionByte.AddressType = 0
 	addrBitsLen := uint(len(hexAddress) * 8)

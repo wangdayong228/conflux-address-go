@@ -23,6 +23,7 @@ We use the following alphabet: 0123456789abcdefghjkmnprstuvwxyz (o, i, l, q remo
 // Body reperents by 5bits byte array
 type Body []byte
 
+// NewBodyByString ...
 func NewBodyByString(base32Str string) (body Body, err error) {
 	for _, v := range base32Str {
 		index, ok := alphabetToIndexMap[v]
@@ -34,29 +35,32 @@ func NewBodyByString(base32Str string) (body Body, err error) {
 	return
 }
 
-// Decode convert concat of version type and hex address to 5 bits slice
-func (b *Body) Decode(vrsByte VersionByte, hexAddress []byte) error {
+// NewBodyByHexAddress convert concat of version type and hex address to 5 bits slice
+func NewBodyByHexAddress(vrsByte VersionByte, hexAddress []byte) (b Body, err error) {
 	vb, err := vrsByte.ToByte()
 	if err != nil {
-		return errors.Wrapf(err, "failed to encode version type %#v", vrsByte)
+		err = errors.Wrapf(err, "failed to encode version type %#v", vrsByte)
+		return
 	}
 	concatenate := append([]byte{vb}, hexAddress[:]...)
 	bits5, err := convert(concatenate, 8, 5)
 	if err != nil {
-		return errors.Wrapf(err, "failed to convert %x from 8 to 5 bits array", concatenate)
+		err = errors.Wrapf(err, "failed to convert %x from 8 to 5 bits array", concatenate)
+		return
 	}
-	*b = bits5
-	return nil
-
+	b = bits5
+	return
 }
 
-func (b Body) Encode() (vrsType VersionByte, hexAddress []byte, err error) {
+// ToHexAddress ...
+func (b Body) ToHexAddress() (vrsType VersionByte, hexAddress []byte, err error) {
 	if len(b) == 0 {
 		err = errors.New("invalid base32 body")
 	}
 
-	vrsType = NewVersionByte(b[0])
-	hexAddress, err = convert(b, 5, 8)
+	val, err := convert(b, 5, 8)
+	vrsType = NewVersionByte(val[0])
+	hexAddress = val[1:]
 	return
 }
 
